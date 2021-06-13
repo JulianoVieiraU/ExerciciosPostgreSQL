@@ -1,0 +1,115 @@
+Join And Subqueries
+1---------------------
+select 
+	b.starttime
+from 
+	cd.members m inner join cd.bookings b
+		on m.memid = b.memid
+where 
+	m.surname like 'Farrell'
+	and m.firstname like 'David';
+
+2---------------------
+select 
+	b.starttime as start, f.name
+from 
+	cd.bookings b inner join cd.facilities f
+		on b.facid = f.facid
+where 
+	starttime between '2012-09-21 ' and '2012-09-22'
+	and name like 'Tennis Court%'
+order by 
+	starttime;
+
+3---------------------
+select 
+	distinct m.firstname, m.surname
+from 
+	cd.members m inner join cd.members me
+		on m.memid = me.recommendedby
+order by 
+	surname, firstname;
+
+4---------------------
+select 
+	m.firstname as memfname, m.surname as memsname,
+	me.firstname as recfname, me.surname as recsname
+from 
+	cd.members m left outer join cd.members me
+		on me.memid = m.recommendedby
+order by 
+	m.surname, m.firstname;
+
+5---------------------
+select 
+	distinct m.firstname || ' ' || m.surname as member, f.name as facility
+from 
+	cd.members m inner join cd.bookings b
+		on m.memid = b.memid
+	inner join cd.facilities f
+		on f.facid = b.facid
+where 
+	f.name like 'Tennis Court%'
+order by 
+	member, facility;
+
+6---------------------
+select 
+	m.firstname || ' ' || m.surname as member,
+	f.name as facility,
+	case
+		when m.memid = 0 then b.slots*f.guestcost
+		else b.slots*f.membercost
+	end as cost
+from 
+	cd.members m inner join cd.bookings b
+		on m.memid = b.memid
+	inner join cd.facilities f
+		on b.facid = f.facid
+where 
+	b.starttime >= '2012-09-14' and
+	b.starttime < '2012-09-15' and 
+	((m.memid = 0 and b.slots*f.guestcost > 30) or
+	(m.memid != 0 and b.slots*f.membercost > 30))
+order by 
+	cost desc;
+
+7-------------------
+select 
+	distinct m.firstname || ' ' || m.surname as member,
+	(select
+	 	me.firstname || ' ' || me.surname as recommender
+	 from
+	 	cd.members me
+	 where
+	 	me.memid = m.recommendedby
+	)
+from
+	cd.members m
+order by member;
+
+8------------------
+select member, facility, cost
+from(
+  select 
+		m.firstname || ' ' || m.surname as member,
+		f.name as facility,
+		case
+			when m.memid = 0 then
+				b.slots*f.guestcost
+			else
+				b.slots*f.membercost
+		end as cost
+		from
+			cd.members m
+			inner join cd.bookings b
+				on m.memid = b.memid
+			inner join cd.facilities f
+				on b.facid = f.facid
+		where
+			b.starttime >= '2012-09-14' and
+			b.starttime < '2012-09-15'
+	) as bookings
+where cost > 30
+order by cost desc;
+

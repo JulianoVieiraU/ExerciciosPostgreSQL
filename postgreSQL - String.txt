@@ -1,0 +1,55 @@
+--String
+1---------------
+select 
+	surname|| ', ' || firstname as name
+from 
+	cd.members;
+
+2---------------
+select *
+from
+	cd.facilities
+where
+	name like 'Tennis%';
+
+3---------------
+select *
+from
+	cd.facilities
+where
+	name ilike 'tennis%';
+
+4---------------
+select 
+	memid, telephone
+from
+	cd.members
+where
+	telephone like '(%)%';
+
+select 
+	memid, telephone
+from
+	cd.members
+where
+	telephone like '(%)%';
+
+5--------------
+select
+	lpad(zipcode::text, 5, '0') as zip
+from
+	cd.members;
+
+6--------------
+select
+	substr(surname, 1, 1) as letter, count(substr(surname, 1, 1)) as count
+from
+	cd.members
+	group by letter
+	order by letter;
+
+7--------------
+select
+	memid, translate(telephone, '- ()', '')  as telephone
+from
+	cd.members;

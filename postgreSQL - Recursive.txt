@@ -1,0 +1,59 @@
+--Recursive
+1-------------------------
+with recursive recommenders(n) as (
+	select recommendedby from cd.members where memid = 27
+	union all
+	select m.recommendedby
+		from recommenders r
+		inner join cd.members m
+			on m.memid = r.n
+)
+select r.n, m.firstname, m.surname
+	from recommenders r
+	inner join cd.members m
+		on r.n = m.memid
+order by memid desc;
+
+2------------------------
+with recursive recommended(n) as (
+	select
+		memid
+	from
+		cd.members
+	where
+		recommendedby = 1
+	
+	union all
+	
+	select 
+		m.memid
+	from 
+		recommended r inner join  cd.members m
+		on m.recommendedby = r.n
+)
+select m.memid, m.firstname, m.surname
+	from recommended r inner join cd.members m
+	on m.memid = r.n
+order by memid asc;
+
+3----------------------
+with recursive recommenders(recommender, member) as (
+    select 
+		recommendedby, memid
+    from 
+		cd.members
+	
+    union all
+	
+    select 
+		m.recommendedby, r.member
+        from recommenders r
+        inner join cd.members m
+            on m.memid = r.recommender
+)
+select r.member member, r.recommender, m.firstname, m.surname
+    from recommenders r
+    inner join cd.members m
+        on r.recommender = m.memid
+    where r.member = 22 or r.member = 12
+order by r.member asc, r.recommender desc;
